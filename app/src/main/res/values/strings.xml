@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ChatApp</string>
+    <string name="create_a_new_account">Create A New Account</string>
+    <string name="log_out">Log Out</string>
+</resources>
