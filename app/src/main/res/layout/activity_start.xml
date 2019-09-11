@@ -13,7 +13,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="245dp"
-        android:text="Welcome Tp Chat App"
+        android:text="Welcome To Chat App"
         android:textSize="18sp" />
 
     <Button

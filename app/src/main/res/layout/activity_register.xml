@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     tools:context="com.abc.chatapp.RegisterActivity">
 
+    <include layout = "@layout/app_bar_layout" android:id="@+id/register"/>
+
     <include
         android:id="@+id/register_toolbar"
         layout="@layout/app_bar_layout"
@@ -54,7 +56,8 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
             android:layout_marginStart="20dp"
-            android:hint="Email" />
+            android:hint="Email"
+            android:inputType="textEmailAddress" />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
@@ -79,7 +82,8 @@
             android:layout_marginEnd="20dp"
             android:layout_marginStart="20dp"
             android:layout_weight="1"
-            android:hint="Password" />
+            android:hint="Password"
+            android:password="true" />
     </android.support.design.widget.TextInputLayout>
 
     <Button
