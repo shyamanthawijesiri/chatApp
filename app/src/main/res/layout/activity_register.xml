@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.abc.chatapp.RegisterActivity">
 
-    <include layout = "@layout/app_bar_layout" android:id="@+id/register"/>
+    <include layout = "@layout/app_bar_layout" android:id="@+id/register_toolbar"/>
 
     <include
         android:id="@+id/register_toolbar"
