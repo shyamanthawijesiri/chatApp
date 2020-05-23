@@ -79,6 +79,10 @@ public class MainActivity extends AppCompatActivity {
             sendToStart();
 
         }
+        if(item.getItemId() == R.id.main_settings_btn){
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+        }
         return  true;
     }
 }
