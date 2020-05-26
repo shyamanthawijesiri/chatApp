@@ -86,6 +86,15 @@ public class SettingsActivity extends AppCompatActivity {
 
             }
         });
+        mChangeStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String status_val = mStatus.getText().toString();
+                Intent status_intent = new Intent(SettingsActivity.this, StatusActivity.class);
+                status_intent.putExtra("status_val", status_val);
+                startActivity(status_intent);
+            }
+        });
 
         mChangeImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,6 +110,8 @@ public class SettingsActivity extends AppCompatActivity {
                 startActivityForResult(Intent.createChooser(galleryIntent, "Select Image"),GELLARY_PICK);
             }
         });
+
+
 
 
 
