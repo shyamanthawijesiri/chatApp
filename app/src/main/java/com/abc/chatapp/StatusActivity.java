@@ -46,6 +46,7 @@ public class StatusActivity extends AppCompatActivity {
 
         mStatusDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(user_id);
 
+
         mInput = (TextInputLayout)findViewById(R.id.status_input_txt);
         mSavebtn = (Button)findViewById(R.id.status_save_btn);
 

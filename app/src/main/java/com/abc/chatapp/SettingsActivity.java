@@ -2,6 +2,8 @@ package com.abc.chatapp;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -28,10 +30,16 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import id.zelory.compressor.Compressor;
 
 public class SettingsActivity extends AppCompatActivity {
     private DatabaseReference mUserDatabase;
@@ -45,6 +53,7 @@ public class SettingsActivity extends AppCompatActivity {
     private Button mChangeImage;
 
     private ProgressDialog mProgressDialog;
+    private Bitmap thumb_img;
 
     private static final int GELLARY_PICK = 1;
 
@@ -65,6 +74,8 @@ public class SettingsActivity extends AppCompatActivity {
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         String current_uid = mCurrentUser.getUid();
+
+
         mUserDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(current_uid);
 
         mUserDatabase.addValueEventListener(new ValueEventListener() {
@@ -78,7 +89,10 @@ public class SettingsActivity extends AppCompatActivity {
 
                 mDisplayName.setText(name);
                 mStatus.setText(status);
-                Picasso.get().load(image).into(mImage);
+                if (!image.equals("default")){
+
+                Picasso.get().load(image).placeholder(R.drawable.avatar).into(mImage);
+                }
             }
 
             @Override
@@ -141,9 +155,28 @@ public class SettingsActivity extends AppCompatActivity {
                 mProgressDialog.setMessage("Please Wait Until Uploading is Finished");
                 mProgressDialog.setCanceledOnTouchOutside(false);
                 mProgressDialog.show();
+
                 Uri resultUri = result.getUri();
+                File thumb_image = new File(resultUri.getPath());
+
+                try {
+                    thumb_img = new Compressor(this)
+                                .setMaxWidth(200)
+                                .setMaxHeight(200)
+                                .setQuality(75)
+                                .compressToBitmap(thumb_image);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                thumb_img.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                final byte[] thumb_byte = baos.toByteArray();
+
                 String user_id = mCurrentUser.getUid();
                 StorageReference filePath = mImageStorage.child("profile_images").child(user_id+".jpg");
+                final StorageReference thumb_file_path = mImageStorage.child("profile_images").child("thumbs").child(user_id+ ".jpg");
+
                 filePath.putFile(resultUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -152,15 +185,35 @@ public class SettingsActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(Uri uri) {
                                         final String imageurl = uri.toString();
-                                        mUserDatabase.child("image").setValue(imageurl).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if(task.isSuccessful()){
-                                                    mProgressDialog.dismiss();
-                                                    Toast.makeText(SettingsActivity.this,"url Upload", Toast.LENGTH_LONG).show();
-                                                }
+                                        UploadTask uploadTask = thumb_file_path.putBytes(thumb_byte);
+
+                                        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onSuccess(UploadTask.TaskSnapshot tasktThumbSnapshot) {
+                                                final Task<Uri> firebaseThumbUri = tasktThumbSnapshot.getStorage().getDownloadUrl();
+                                                firebaseThumbUri.addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                    @Override
+                                                    public void onSuccess(Uri uri) {
+                                                        final String thumburl = uri.toString();
+                                                        Map image_hashmap = new HashMap<>();
+                                                        image_hashmap.put("image", imageurl);
+                                                        image_hashmap.put("thumb_image", thumburl);
+                                                            mUserDatabase.updateChildren(image_hashmap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if(task.isSuccessful()){
+                                                                        mProgressDialog.dismiss();
+                                                                        Toast.makeText(SettingsActivity.this,"url Upload", Toast.LENGTH_LONG).show();
+                                                                    }
+                                                                }
+                                                            });
+
+                                                    }
+                                                });
+
                                             }
                                         });
+
                                     }
                                 });
 
