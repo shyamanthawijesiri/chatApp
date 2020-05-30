@@ -2,14 +2,16 @@ package com.abc.chatapp;
 
 public class Users {
 
-    public String name, image, status;
+    public String name, image, status,thumb_image;
 
     public Users(){}
 
-    public Users(String name, String image, String status) {
+
+    public Users(String name, String image, String status, String thumb_image) {
         this.name = name;
         this.image = image;
         this.status = status;
+        this.thumb_image = thumb_image;
     }
 
     public String getImage() {
@@ -36,5 +38,12 @@ public class Users {
         this.name = name;
     }
 
+    public String getThumbImage() {
+        return thumb_image;
+    }
+
+    public void setThumbImage(String thumbImage) {
+        this.thumb_image = thumbImage;
+    }
 
 }

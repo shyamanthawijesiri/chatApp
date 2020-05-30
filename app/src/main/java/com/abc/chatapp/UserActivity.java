@@ -1,5 +1,7 @@
 package com.abc.chatapp;
 
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.icu.text.IDNA;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -59,7 +61,17 @@ public class UserActivity extends AppCompatActivity {
        protected void onBindViewHolder(@NonNull UsersViewHolder holder, int position, @NonNull Users users) {
            holder.setName(users.getName());
            holder.setStauts(users.getStatus());
-           holder.setImage(users.getImage());
+           holder.setThumbImage(users.getThumbImage());
+
+           final String user_id = getRef(position).getKey();
+           holder.view.setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View view) {
+                   Intent profileIntent = new Intent(UserActivity.this, ProfileActivity.class);
+                   profileIntent.putExtra("user_id", user_id);
+                   startActivity(profileIntent);
+               }
+           });
        }
 
        @NonNull
@@ -90,12 +102,13 @@ public class UserActivity extends AppCompatActivity {
             mStatus.setText(stauts);
 
         }
-        public void setImage(String url){
+        public void setThumbImage(String url){
             CircleImageView image = (CircleImageView) view.findViewById(R.id.user_image);
-            if(!url.equals("default")){
+            if (!url.equals("default")){
 
             Picasso.get().load(url).into(image);
             }
+
         }
     }
 }
