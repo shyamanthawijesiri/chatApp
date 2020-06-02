@@ -79,7 +79,29 @@ public class ProfileActivity extends AppCompatActivity {
                 mStatus.setText(status);
                 Picasso.get().load(image).into(mProfileImage);
 
-                mProgressDialog.dismiss();
+                // ----------------------Friend list / request feature----------------------
+                mFriendRequestDatabase.child(mCurrentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.hasChild(id)){
+                            String req_type = dataSnapshot.child(id).child("request_type").getValue().toString();
+                            if(req_type.equals("received")){
+                                mCurrent_state= "request_received";
+                                mSendRequest.setText("Accept friend request");
+                            }else if(req_type.equals("sent")){
+                                mCurrent_state= "request_sent";
+                                mSendRequest.setText("Cancel friend request");
+                            }
+                        }
+                        mProgressDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
             }
 
             @Override
@@ -91,6 +113,8 @@ public class ProfileActivity extends AppCompatActivity {
         mSendRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // -----------------send request--------------------------
+                    mSendRequest.setEnabled(false);
                 if(mCurrent_state.equals("not_friend")){
                     mFriendRequestDatabase.child(mCurrentUser.getUid()).child(id).child("request_type")
                             .setValue("sent").addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -102,12 +126,31 @@ public class ProfileActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(Void aVoid) {
 
+                                        mCurrent_state= "request_sent";
+                                        mSendRequest.setText("cancel friend request");
+                                        mSendRequest.setEnabled(true);
                                         Toast.makeText(ProfileActivity.this,"sending request successfully",Toast.LENGTH_LONG).show();
                                     }
                                 });
                             }else {
                                 Toast.makeText(ProfileActivity.this,"sending request is failed",Toast.LENGTH_LONG).show();
                             }
+                        }
+                    });
+                }
+
+                if(mCurrent_state.equals("request_sent")){
+                    mFriendRequestDatabase.child(mCurrentUser.getUid()).child(id).removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            mFriendRequestDatabase.child(id).child(mCurrentUser.getUid()).removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    mSendRequest.setEnabled(true);
+                                    mCurrent_state="not_friend";
+                                    mSendRequest.setText("Send Friend Request");
+                                }
+                            });
                         }
                     });
                 }
