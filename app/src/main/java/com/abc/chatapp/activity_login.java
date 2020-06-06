@@ -13,9 +13,13 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.w3c.dom.Text;
 
@@ -29,6 +33,7 @@ public class activity_login extends AppCompatActivity {
     private ProgressDialog mLoginProgress;
 
     private FirebaseAuth mAuth;
+    private DatabaseReference mUserDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +51,7 @@ public class activity_login extends AppCompatActivity {
         mLoginPassword = (TextInputLayout) findViewById(R.id.login_password);
         mLogin_btn = (Button) findViewById(R.id.logn_btn);
 
+        mUserDatabase = FirebaseDatabase.getInstance().getReference().child("Users");
 
 
         mLogin_btn.setOnClickListener(new View.OnClickListener() {
@@ -74,10 +80,21 @@ public class activity_login extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if(task.isSuccessful()){
                     mLoginProgress.dismiss();
+
+                    String user_id = mAuth.getCurrentUser().getUid();
+                    String device_token = FirebaseInstanceId.getInstance().getToken();
+
+                    mUserDatabase.child(user_id).child("device_token").setValue(device_token).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+
                     Intent mainIntent = new Intent(activity_login.this,MainActivity.class);
                     mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(mainIntent);
                     finish();
+                        }
+                    });
+
                 }else{
                     mLoginProgress.hide();
                     Toast.makeText(activity_login.this, task.getException().getMessage(),Toast.LENGTH_LONG).show();
