@@ -203,11 +203,11 @@ public class ProfileActivity extends AppCompatActivity {
                         //--------------------------- request received------------------------------------------------
                         if(mCurrent_state.equals("request_received")){
 
-                            final String current_date = DateFormat.getTimeInstance().format(new Date());
+                            final String current_date = DateFormat.getDateTimeInstance().format(new Date());
 
                             Map friendMap = new HashMap();
-                            friendMap.put("Friend/" + mCurrentUser.getUid() + "/" + id + "/data", current_date);
-                            friendMap.put("Friend/"+ id + "/" + mCurrentUser.getUid() + "/data", current_date);
+                            friendMap.put("Friend/" + mCurrentUser.getUid() + "/" + id + "/date", current_date);
+                            friendMap.put("Friend/"+ id + "/" + mCurrentUser.getUid() + "/date", current_date);
 
                             friendMap.put("Friend_req/"+ mCurrentUser.getUid() + "/" + id , null);
                             friendMap.put("Friend_req/"+ id + "/" + mCurrentUser.getUid() , null);

@@ -11,4 +11,9 @@
         android:layout_height="wrap_content"
         android:text="welcome to friends" />
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/friend_list"
+        android:layout_width="match_parent"
+        android:layout_height="786dp" />
+
 </FrameLayout>
