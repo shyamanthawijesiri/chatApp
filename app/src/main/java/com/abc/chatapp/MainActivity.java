@@ -14,9 +14,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 
 public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
+    private FirebaseUser mCurrentUser;
     private DatabaseReference mUserRef;
     private android.support.v7.widget.Toolbar mToolbar;
     private ViewPager mViewPager;
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         mUserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid());
+        mCurrentUser = mAuth.getCurrentUser();
 
         mToolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.main_page_toolbar);
         setSupportActionBar(mToolbar);
@@ -51,11 +54,11 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser == null){
+
+        if(mCurrentUser == null){
             sendToStart();
         }else{
-            mUserRef.child("online").setValue(true);
+            mUserRef.child("online").setValue("true");
         }
 
     }
@@ -63,7 +66,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        mUserRef.child("online").setValue(false);
+        if(mCurrentUser != null){
+
+        mUserRef.child("online").setValue(ServerValue.TIMESTAMP);
+
+        }
     }
 
     private void sendToStart() {

@@ -1,6 +1,8 @@
 package com.abc.chatapp;
 
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -76,20 +78,50 @@ public class FriendsFragment extends Fragment {
             @Override
             protected void onBindViewHolder(@NonNull final FriendViewHolder holder, int position, @NonNull Friends friend) {
 
-                String list_user_id = getRef(position).getKey();
+                final String list_user_id = getRef(position).getKey();
                 mUserDatabase.child(list_user_id).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        String name = dataSnapshot.child("name").getValue().toString();
+                        final String name = dataSnapshot.child("name").getValue().toString();
                         String image_thumb = dataSnapshot.child("thumb_image").getValue().toString();
                         if(dataSnapshot.hasChild("online")){
 
-                        boolean user_online = (boolean)dataSnapshot.child("online").getValue();
+                        String user_online = dataSnapshot.child("online").getValue().toString();
                         holder.setOnline(user_online);
                         }
 
                         holder.setName(name);
                         holder.setThumbImage(image_thumb);
+
+                        holder.mView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                CharSequence options[] = new CharSequence[]{"View Profile","Send Message"};
+
+                                final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                builder.setTitle("Select Option");
+                                builder.setItems(options, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                                        if(i == 0){
+                                            Intent profileIntent = new Intent(getContext(), ProfileActivity.class);
+                                            profileIntent.putExtra("user_id", list_user_id);
+                                            startActivity(profileIntent);
+                                        }
+
+                                        if(i == 1){
+                                            Intent chatIntent = new Intent(getContext(), ChatActivity.class);
+                                            chatIntent.putExtra("user_id", list_user_id);
+                                            chatIntent.putExtra("user_Name", name);
+                                            startActivity(chatIntent);
+                                        }
+
+                                    }
+                                });
+                                builder.show();
+                            }
+                        });
                     }
 
                     @Override
@@ -140,9 +172,9 @@ public class FriendsFragment extends Fragment {
             }
         }
 
-        public void setOnline(boolean online){
+        public void setOnline(String online){
             ImageView onlineIcon = (ImageView) mView.findViewById(R.id.user_online_icon);
-            if(online == true){
+            if(online.equals("true")){
                 onlineIcon.setVisibility(mView.VISIBLE);
 
             }else{
