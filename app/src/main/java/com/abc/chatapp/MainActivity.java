@@ -33,12 +33,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mAuth = FirebaseAuth.getInstance();
-        mUserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid());
+
         mCurrentUser = mAuth.getCurrentUser();
 
         mToolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.main_page_toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("Chat App");
+
+        if(mAuth.getCurrentUser() != null){
+            mUserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid());
+        }
 
         //tabs
         mViewPager = (ViewPager)findViewById(R.id.main_tabpager);

@@ -6,6 +6,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -16,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,7 +27,9 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -46,6 +51,13 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton mChatAddbtn;
     private ImageButton mChatSendbtn;
     private EditText mChatmsg;
+
+    private RecyclerView mMessageList;
+
+    private final List<Message> messagesList = new ArrayList<>();
+    private LinearLayoutManager mLinearLayout;
+    private MessageAdapter mAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +67,19 @@ public class ChatActivity extends AppCompatActivity {
         mChatAddbtn = (ImageButton)findViewById(R.id.chat_add_btn);
         mChatSendbtn = (ImageButton)findViewById(R.id.chat_send_btn);
         mChatmsg = (EditText)findViewById(R.id.chat_msg_txt);
+
+
+        mAdapter = new MessageAdapter(messagesList);
+        mMessageList = (RecyclerView)findViewById(R.id.message_list);
+        mLinearLayout = new LinearLayoutManager(this);
+
+        mMessageList.setHasFixedSize(true);
+        mMessageList.setLayoutManager(mLinearLayout);
+
+        mMessageList.setAdapter(mAdapter);
+
+
+
         
         mRootRef = FirebaseDatabase.getInstance().getReference();
 
@@ -70,7 +95,7 @@ public class ChatActivity extends AppCompatActivity {
 
         mCurrentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         //getSupportActionBar().setTitle(mChatUserName);
-
+        loadMessages();
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View action_bar_view = inflater.inflate(R.layout.chat_custom_bar, null);
         actionBar.setCustomView(action_bar_view);
@@ -144,10 +169,42 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
+    private void loadMessages() {
+        mRootRef.child("message").child(mCurrentUserId).child(mChatUser).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                Message message = dataSnapshot.getValue(Message.class);
+                messagesList.add(message);
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     private void sendMessage() {
         String msg = mChatmsg.getText().toString();
 
-        if(!TextUtils.isEmpty(msg)){
+        if(!
+                TextUtils.isEmpty(msg)){
 
             String current_user_ref ="message/" + mCurrentUserId + "/" +mChatUser;
             String chat_user_ref = "message/" + mChatUser + "/" + mCurrentUserId;
