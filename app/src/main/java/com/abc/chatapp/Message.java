@@ -2,11 +2,19 @@ package com.abc.chatapp;
 
 public class Message {
 
-    private String message, type;
+    private String message;
+    private String type;
+
+
+
+    private String from;
     private long time;
     private boolean seen;
 
     public Message(){}
+    public Message(String from){
+        this.from = from;
+    }
 
     public Message(String message, String type, long time, boolean seen) {
         this.message = message;
@@ -45,5 +53,13 @@ public class Message {
 
     public void setSeen(boolean seen) {
         this.seen = seen;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
     }
 }

@@ -3,6 +3,7 @@ package com.abc.chatapp;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
@@ -53,10 +55,14 @@ public class ChatActivity extends AppCompatActivity {
     private EditText mChatmsg;
 
     private RecyclerView mMessageList;
+    private SwipeRefreshLayout mSweepRefreshLayout;
 
     private final List<Message> messagesList = new ArrayList<>();
     private LinearLayoutManager mLinearLayout;
     private MessageAdapter mAdapter;
+
+    private static final int TOTAL_ITEM_TO_LOAD = 10;
+    private int mCurrentPage = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +77,7 @@ public class ChatActivity extends AppCompatActivity {
 
         mAdapter = new MessageAdapter(messagesList);
         mMessageList = (RecyclerView)findViewById(R.id.message_list);
+        mSweepRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.message_sweep_layout);
         mLinearLayout = new LinearLayoutManager(this);
 
         mMessageList.setHasFixedSize(true);
@@ -165,17 +172,32 @@ public class ChatActivity extends AppCompatActivity {
                 sendMessage();
             }
         });
+        mSweepRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mCurrentPage++;
+                messagesList.clear();
+                loadMessages();
+            }
+        });
 
 
     }
 
     private void loadMessages() {
-        mRootRef.child("message").child(mCurrentUserId).child(mChatUser).addChildEventListener(new ChildEventListener() {
+
+        DatabaseReference messageRef = mRootRef.child("message").child(mCurrentUserId).child(mChatUser);
+        Query messageQuery = messageRef.limitToLast(mCurrentPage * TOTAL_ITEM_TO_LOAD);
+
+        messageQuery.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 Message message = dataSnapshot.getValue(Message.class);
                 messagesList.add(message);
                 mAdapter.notifyDataSetChanged();
+
+                mMessageList.scrollToPosition(messagesList.size() - 1);
+                mSweepRefreshLayout.setRefreshing(false);
             }
 
             @Override
@@ -218,10 +240,13 @@ public class ChatActivity extends AppCompatActivity {
             msgMap.put("seen", false);
             msgMap.put("type", "text");
             msgMap.put("time", ServerValue.TIMESTAMP);
+            msgMap.put("from", mCurrentUserId);
 
             Map msgUserMap = new HashMap();
             msgUserMap.put(current_user_ref + "/" + push_id, msgMap);
             msgUserMap.put(chat_user_ref + "/" + push_id, msgMap);
+
+            mChatmsg.setText("");
 
             mRootRef.updateChildren(msgUserMap, new DatabaseReference.CompletionListener() {
                 @Override
