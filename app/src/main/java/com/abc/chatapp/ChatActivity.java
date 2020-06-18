@@ -30,6 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,9 @@ public class ChatActivity extends AppCompatActivity {
 
     private static final int TOTAL_ITEM_TO_LOAD = 10;
     private int mCurrentPage = 1;
+    private int itemPos = 0;
+    private String mLastKey = "";
+    private String mPrevKey = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,12 +180,66 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 mCurrentPage++;
-                messagesList.clear();
-                loadMessages();
+                itemPos = 0;
+               loadMoreMessages();
+//                messagesList.clear();
+//                loadMessages();
             }
         });
 
 
+    }
+
+    private void loadMoreMessages() {
+        DatabaseReference messageRef = mRootRef.child("message").child(mCurrentUserId).child(mChatUser);
+        Query messageQuery = messageRef.orderByKey().endAt(mLastKey).limitToLast(TOTAL_ITEM_TO_LOAD);
+
+        messageQuery.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                Message message = dataSnapshot.getValue(Message.class);
+                String messageKey = dataSnapshot.getKey();
+
+
+//
+                if(!mPrevKey.equals(messageKey)){
+                    messagesList.add(itemPos++, message);
+                }else{
+                    mPrevKey = mLastKey;
+                }
+//
+                if(itemPos == 1){
+                    mLastKey = messageKey;
+                }
+
+                Log.d("TOTALKEYS", "Last key:" + mLastKey + " | Prev Key:" + mPrevKey + " | Message key:" + messageKey);
+
+                mAdapter.notifyDataSetChanged();
+                mSweepRefreshLayout.setRefreshing(false);
+                mLinearLayout.scrollToPositionWithOffset(10,0);
+                Log.d("All msg","message list "+ Arrays.toString(messagesList.toArray()) + "item postitom"+ itemPos);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void loadMessages() {
@@ -193,11 +251,24 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 Message message = dataSnapshot.getValue(Message.class);
+                    itemPos++;
+
+                if(itemPos == 1){
+                    String messageKey = dataSnapshot.getKey();
+                    mLastKey = messageKey;
+                    mPrevKey = messageKey;
+                }
+
                 messagesList.add(message);
                 mAdapter.notifyDataSetChanged();
 
+
                 mMessageList.scrollToPosition(messagesList.size() - 1);
                 mSweepRefreshLayout.setRefreshing(false);
+
+
+                    Log.d("All msg","message list "+ Arrays.toString(messagesList.toArray()) + "item postitom"+ itemPos);
+
             }
 
             @Override
@@ -225,8 +296,7 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage() {
         String msg = mChatmsg.getText().toString();
 
-        if(!
-                TextUtils.isEmpty(msg)){
+        if(!TextUtils.isEmpty(msg)){
 
             String current_user_ref ="message/" + mCurrentUserId + "/" +mChatUser;
             String chat_user_ref = "message/" + mChatUser + "/" + mCurrentUserId;
