@@ -106,6 +106,7 @@ public class ChatActivity extends AppCompatActivity {
 
         mCurrentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         //getSupportActionBar().setTitle(mChatUserName);
+        messagesList.clear();
         loadMessages();
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View action_bar_view = inflater.inflate(R.layout.chat_custom_bar, null);
@@ -184,6 +185,7 @@ public class ChatActivity extends AppCompatActivity {
                loadMoreMessages();
 //                messagesList.clear();
 //                loadMessages();
+
             }
         });
 
@@ -245,52 +247,57 @@ public class ChatActivity extends AppCompatActivity {
     private void loadMessages() {
 
         DatabaseReference messageRef = mRootRef.child("message").child(mCurrentUserId).child(mChatUser);
-        Query messageQuery = messageRef.limitToLast(mCurrentPage * TOTAL_ITEM_TO_LOAD);
-
-        messageQuery.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                Message message = dataSnapshot.getValue(Message.class);
+        Query messageQuery;
+        if(itemPos>0){
+            messageQuery = messageRef.limitToLast(1);
+        }else {
+            messageQuery = messageRef.limitToLast(mCurrentPage * TOTAL_ITEM_TO_LOAD);
+        }
+            messageQuery.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                    Message message = dataSnapshot.getValue(Message.class);
                     itemPos++;
 
-                if(itemPos == 1){
-                    String messageKey = dataSnapshot.getKey();
-                    mLastKey = messageKey;
-                    mPrevKey = messageKey;
+                    if (itemPos == 1) {
+                        String messageKey = dataSnapshot.getKey();
+                        mLastKey = messageKey;
+                        mPrevKey = messageKey;
+                    }
+
+                    messagesList.add(message);
+                    mAdapter.notifyDataSetChanged();
+
+
+                    mMessageList.scrollToPosition(messagesList.size() - 1);
+                    mSweepRefreshLayout.setRefreshing(false);
+
+
+                    Log.d("All msg", "message list " + Arrays.toString(messagesList.toArray()) + "item postitom" + itemPos);
+
                 }
 
-                messagesList.add(message);
-                mAdapter.notifyDataSetChanged();
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
+                }
 
-                mMessageList.scrollToPosition(messagesList.size() - 1);
-                mSweepRefreshLayout.setRefreshing(false);
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
 
+                }
 
-                    Log.d("All msg","message list "+ Arrays.toString(messagesList.toArray()) + "item postitom"+ itemPos);
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
 
-            }
+                }
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
+                }
+            });
 
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void sendMessage() {
