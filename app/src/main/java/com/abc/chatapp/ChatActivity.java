@@ -67,6 +67,8 @@ public class ChatActivity extends AppCompatActivity {
     private int itemPos = 0;
     private String mLastKey = "";
     private String mPrevKey = "";
+    private String mFirstKey ;
+    private int flag = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,6 +170,33 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
+        mRootRef.child("message").child(mCurrentUserId).child(mChatUser).orderByKey().limitToFirst(1).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                mFirstKey = dataSnapshot.getKey();
+                Log.d("All msg","firstKey "+ mFirstKey);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
         
         // send message
         
@@ -180,7 +209,7 @@ public class ChatActivity extends AppCompatActivity {
         mSweepRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mCurrentPage++;
+               // mCurrentPage++;
                 itemPos = 0;
                loadMoreMessages();
 //                messagesList.clear();
@@ -213,6 +242,15 @@ public class ChatActivity extends AppCompatActivity {
                 if(itemPos == 1){
                     mLastKey = messageKey;
                 }
+                Log.d("All msg", "mLastkey" + mLastKey);
+                if(messageKey.equals(mFirstKey)){
+                    itemPos = 2;
+                    flag =0;
+                    Log.d("All msg","message_poss_10 "+ itemPos);
+                    mSweepRefreshLayout.setRefreshing(false);
+                    return;
+                }
+
 
                 Log.d("TOTALKEYS", "Last key:" + mLastKey + " | Prev Key:" + mPrevKey + " | Message key:" + messageKey);
 
@@ -248,10 +286,10 @@ public class ChatActivity extends AppCompatActivity {
 
         DatabaseReference messageRef = mRootRef.child("message").child(mCurrentUserId).child(mChatUser);
         Query messageQuery;
-        if(itemPos>0){
+        if(flag == 0){
             messageQuery = messageRef.limitToLast(1);
         }else {
-            messageQuery = messageRef.limitToLast(mCurrentPage * TOTAL_ITEM_TO_LOAD);
+            messageQuery = messageRef.limitToLast(TOTAL_ITEM_TO_LOAD);
         }
             messageQuery.addChildEventListener(new ChildEventListener() {
                 @Override
@@ -263,7 +301,9 @@ public class ChatActivity extends AppCompatActivity {
                         String messageKey = dataSnapshot.getKey();
                         mLastKey = messageKey;
                         mPrevKey = messageKey;
+                        Log.d("All msg", "message_item_poss " + Arrays.toString(messagesList.toArray()) + "item postitom" + itemPos);
                     }
+                    Log.d("All msg", "mLastkey" + mLastKey);
 
                     messagesList.add(message);
                     mAdapter.notifyDataSetChanged();
