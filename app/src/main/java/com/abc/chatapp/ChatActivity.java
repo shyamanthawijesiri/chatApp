@@ -244,7 +244,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
                 Log.d("All msg", "mLastkey" + mLastKey);
                 if(messageKey.equals(mFirstKey)){
-                    itemPos = 2;
+
                     flag =0;
                     Log.d("All msg","message_poss_10 "+ itemPos);
                     mSweepRefreshLayout.setRefreshing(false);
@@ -297,7 +297,7 @@ public class ChatActivity extends AppCompatActivity {
                     Message message = dataSnapshot.getValue(Message.class);
                     itemPos++;
 
-                    if (itemPos == 1) {
+                    if (itemPos == 1 && flag==1) {
                         String messageKey = dataSnapshot.getKey();
                         mLastKey = messageKey;
                         mPrevKey = messageKey;
