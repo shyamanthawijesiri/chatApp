@@ -264,43 +264,7 @@ public class ChatActivity extends AppCompatActivity {
 
             final StorageReference file_path = mImageStorage.child("message_images").child(push_id + ".jpg");
 
-//            file_path.putFile(imageuri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-//                @Override
-//                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-//                    if(task.isSuccessful()){
-//                        Task<Uri> download_uri = task.getResult().getStorage().getDownloadUrl();
-//
-//                        download_uri.addOnCompleteListener(new OnCompleteListener<Uri>() {
-//                            @Override
-//                            public void onComplete(@NonNull Task<Uri> task) {
-//                                String download_url = task.toString();
-//
-//                                Map msgMap = new HashMap();
-//                                msgMap.put("message", download_url);
-//                                msgMap.put("seen", false);
-//                                msgMap.put("type", "image");
-//                                msgMap.put("time", ServerValue.TIMESTAMP);
-//                                msgMap.put("from", mCurrentUserId);
-//
-//                                Map msgUserMap = new HashMap();
-//                                msgUserMap.put(current_user_ref + "/" + push_id, msgMap);
-//                                msgUserMap.put(chat_user_ref + "/" + push_id, msgMap);
-//
-//                                mRootRef.updateChildren(msgUserMap, new DatabaseReference.CompletionListener() {
-//                                    @Override
-//                                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-//                                        if(databaseError != null){
-//                                            Log.d("CHAT_LOG",databaseError.getMessage());
-//                                        }
-//                                    }
-//                                });
-//                            }
-//                        });
-//
-//
-//                    }
-//                }
-//            });
+
             file_path.putFile(imageuri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
