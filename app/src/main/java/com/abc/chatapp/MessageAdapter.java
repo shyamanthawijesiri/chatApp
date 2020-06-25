@@ -9,8 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
@@ -22,6 +25,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     private List<Message>  mMessageList;
     private FirebaseAuth mAuth;
+    private DatabaseReference mMessageDatabase;
 
     public MessageAdapter(List<Message> mMessageList ){
         this.mMessageList = mMessageList;
@@ -49,15 +53,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         }
     }
     @Override
-    public void onBindViewHolder(MessageViewHolder viewHolder, int i){
+    public void onBindViewHolder(final MessageViewHolder viewHolder, final int i){
         mAuth = FirebaseAuth.getInstance();
         String current_user_id = mAuth.getCurrentUser().getUid();
+        mMessageDatabase = FirebaseDatabase.getInstance().getReference().child(current_user_id);
 
         Message c = mMessageList.get(i);
         String from_user = c.getFrom();
-        String msg_type = c.getType();
-
+        final String msg_type = c.getType();
+       // String delete_key = mMessageDatabase.getRef(i).getKey();
         viewHolder.messageText.setText(c.getMessage());
+        viewHolder.messageText.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                Toast.makeText(viewHolder.messageText.getContext(), "Long-tapped on: "+viewHolder.messageText.getText(), Toast.LENGTH_SHORT).show();
+                mMessageList.remove(i);
+                notifyItemRemoved(i);
+                notifyItemRangeChanged(i, mMessageList.size());
+
+
+                return false;
+            }
+        });
 
         if(msg_type.equals("text")){
             viewHolder.messageImage.setVisibility(View.INVISIBLE);
@@ -89,4 +106,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public int getItemCount(){
         return mMessageList.size();
     }
+
+
 }
