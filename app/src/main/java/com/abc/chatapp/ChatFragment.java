@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -75,13 +76,13 @@ public class ChatFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
+
         Query conversationQuery = mConvDatabase.orderByChild("timestamp");
         FirebaseRecyclerOptions<Conv> options = new FirebaseRecyclerOptions.Builder<Conv>().setQuery(conversationQuery, Conv.class).build();
         FirebaseRecyclerAdapter<Conv, ConvViewHolder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<Conv, ConvViewHolder>(options) {
             @Override
             protected void onBindViewHolder(@NonNull final ConvViewHolder holder, int position, @NonNull final Conv conv) {
                 final String list_user_id = getRef(position).getKey();
-
 
                 Query lastMessage = mMessageDatabase.child(list_user_id).limitToLast(1);//get last msg
 

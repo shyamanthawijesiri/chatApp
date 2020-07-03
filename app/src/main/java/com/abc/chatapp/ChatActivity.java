@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -70,7 +71,8 @@ public class ChatActivity extends AppCompatActivity {
     private RecyclerView mMessageList;
     private SwipeRefreshLayout mSweepRefreshLayout;
 
-    private final List<Message> messagesList = new ArrayList<>();
+    private  List<Message> messagesList = new ArrayList<>();
+    private List<String>keyList = new ArrayList<String>();
     private LinearLayoutManager mLinearLayout;
     private MessageAdapter mAdapter;
 
@@ -94,8 +96,9 @@ public class ChatActivity extends AppCompatActivity {
         mChatSendbtn = (ImageButton)findViewById(R.id.chat_send_btn);
         mChatmsg = (EditText)findViewById(R.id.chat_msg_txt);
 
-
-        mAdapter = new MessageAdapter(messagesList);
+        mChatUser = getIntent().getStringExtra("user_id");
+        mChatUserName = getIntent().getStringExtra("user_name");
+        mAdapter = new MessageAdapter(messagesList,keyList, mChatUser);
         mMessageList = (RecyclerView)findViewById(R.id.message_list);
         mSweepRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.message_sweep_layout);
         mLinearLayout = new LinearLayoutManager(this);
@@ -118,13 +121,12 @@ public class ChatActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setDisplayShowCustomEnabled(true);
 
-        mChatUser = getIntent().getStringExtra("user_id");
-        mChatUserName = getIntent().getStringExtra("user_name");
+
 
         mCurrentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         //getSupportActionBar().setTitle(mChatUserName);
         messagesList.clear();
-        loadMessages();
+        //loadMessages();
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View action_bar_view = inflater.inflate(R.layout.chat_custom_bar, null);
         actionBar.setCustomView(action_bar_view);
@@ -246,6 +248,12 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        loadMessages();
+    }
+
     //send image
 
 
@@ -313,6 +321,7 @@ public class ChatActivity extends AppCompatActivity {
 
 //
                 if(!mPrevKey.equals(messageKey)){
+                    keyList.add(itemPos,messageKey);
                     messagesList.add(itemPos++, message);
                 }else{
                     mPrevKey = mLastKey;
@@ -368,7 +377,7 @@ public class ChatActivity extends AppCompatActivity {
         if(flag == 0){
             messageQuery = messageRef.limitToLast(1);
         }else {
-            messageQuery = messageRef.limitToLast(TOTAL_ITEM_TO_LOAD);
+            messageQuery = messageRef.limitToLast(5);
         }
             messageQuery.addChildEventListener(new ChildEventListener() {
                 @Override
@@ -385,6 +394,7 @@ public class ChatActivity extends AppCompatActivity {
                     Log.d("All msg", "mLastkey" + mLastKey);
 
                     messagesList.add(message);
+                    keyList.add(dataSnapshot.getKey());
                     mAdapter.notifyDataSetChanged();
 
 
@@ -393,17 +403,17 @@ public class ChatActivity extends AppCompatActivity {
 
 
                     Log.d("All msg", "message list " + Arrays.toString(messagesList.toArray()) + "item postitom" + itemPos);
-
+                    Toast.makeText(ChatActivity.this, "add child: "+flag, Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+                    //Toast.makeText(ChatActivity.this, "change child: ", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
+                    Toast.makeText(ChatActivity.this, "remove child: ", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override

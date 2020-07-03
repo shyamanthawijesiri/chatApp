@@ -4,55 +4,77 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark"
+    android:background="#DDD5E4"
     tools:context=".SettingsActivity">
+
+    <include
+        android:id="@+id/setting_toolbar"
+        layout="@layout/app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></include>
+    <!--    <include-->
+    <!--        android:id="@+id/status_appbar"-->
+    <!--        layout="@layout/app_bar_layout"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"></include>-->
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/settings_image"
-        android:layout_width="124dp"
-        android:layout_height="124dp"
-        android:layout_marginStart="150dp"
-        android:layout_marginTop="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="212dp"
+        android:layout_below="@+id/setting_toolbar"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="0dp"
+        android:background="#B7B8B9"
+        android:foregroundGravity="center_horizontal"
         android:src="@drawable/avatar" />
 
     <TextView
         android:id="@+id/settings_status"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginEnd="167dp"
-        android:layout_marginBottom="413dp"
-        android:text="Hello World" />
+        android:layout_below="@+id/settings_displayName"
+        android:layout_marginTop="43dp"
+        android:gravity="center_horizontal"
+        android:text="Hello World"
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/settings_displayName"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/settings_image"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginStart="163dp"
-        android:layout_marginTop="248dp"
-        android:text="Display Name" />
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="27dp"
+        android:gravity="center_horizontal"
+        android:text="Display Name"
+        android:textSize="36sp" />
 
     <Button
         android:id="@+id/setting_image_btn"
-        android:layout_width="145dp"
+        android:layout_width="203dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/settings_status"
+        android:layout_alignParentEnd="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="274dp"
+        android:layout_marginTop="73dp"
+        android:layout_marginEnd="95dp"
         android:text="Change Image" />
 
     <Button
         android:id="@+id/settings_status_btn"
-        android:layout_width="138dp"
+        android:layout_width="201dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/setting_image_btn"
+        android:layout_alignParentStart="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="185dp"
+        android:layout_marginStart="116dp"
+        android:layout_marginTop="25dp"
         android:background="@color/colorAccent"
         android:text="Change Status" />
 

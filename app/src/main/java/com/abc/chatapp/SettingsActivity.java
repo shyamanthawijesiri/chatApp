@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -54,6 +55,8 @@ public class SettingsActivity extends AppCompatActivity {
     private Button mChangeStatus;
     private Button mChangeImage;
 
+    private Toolbar mToolbar;
+
     private ProgressDialog mProgressDialog;
     private Bitmap thumb_img;
 
@@ -77,6 +80,10 @@ public class SettingsActivity extends AppCompatActivity {
 
         String current_uid = mCurrentUser.getUid();
 
+        mToolbar = (Toolbar)findViewById(R.id.setting_toolbar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setTitle("Settings");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mUserDatabase = FirebaseDatabase.getInstance().getReference().child("Users").child(current_uid);
         mUserDatabase.keepSynced(true);
@@ -84,7 +91,7 @@ public class SettingsActivity extends AppCompatActivity {
         mUserDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Toast.makeText(SettingsActivity.this, dataSnapshot.toString(), Toast.LENGTH_LONG).show();
+               // Toast.makeText(SettingsActivity.this, dataSnapshot.toString(), Toast.LENGTH_LONG).show();
                 String name = dataSnapshot.child("name").getValue().toString();
                 final String image = dataSnapshot.child("image").getValue().toString();
                 String status = dataSnapshot.child("status").getValue().toString();

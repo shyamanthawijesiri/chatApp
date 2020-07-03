@@ -11,9 +11,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
@@ -24,11 +28,17 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
     private List<Message>  mMessageList;
+    private List<String> mMessagkey;
     private FirebaseAuth mAuth;
     private DatabaseReference mMessageDatabase;
 
-    public MessageAdapter(List<Message> mMessageList ){
+    private String mChatUser;
+
+
+    public MessageAdapter(List<Message> mMessageList, List<String> mMessagkey, String mChatUer ){
         this.mMessageList = mMessageList;
+        this.mMessagkey = mMessagkey;
+        this.mChatUser = mChatUer;
 
     }
     public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
@@ -56,20 +66,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public void onBindViewHolder(final MessageViewHolder viewHolder, final int i){
         mAuth = FirebaseAuth.getInstance();
         String current_user_id = mAuth.getCurrentUser().getUid();
-        mMessageDatabase = FirebaseDatabase.getInstance().getReference().child(current_user_id);
-
+        mMessageDatabase = FirebaseDatabase.getInstance().getReference().child("message").child(current_user_id).child(mChatUser);
+        //Query key = mMessageDatabase;
         Message c = mMessageList.get(i);
         String from_user = c.getFrom();
         final String msg_type = c.getType();
-       // String delete_key = mMessageDatabase.getRef(i).getKey();
+
         viewHolder.messageText.setText(c.getMessage());
         viewHolder.messageText.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                Toast.makeText(viewHolder.messageText.getContext(), "Long-tapped on: "+viewHolder.messageText.getText(), Toast.LENGTH_SHORT).show();
+
                 mMessageList.remove(i);
                 notifyItemRemoved(i);
-                notifyItemRangeChanged(i, mMessageList.size());
+                mMessageDatabase.child(mMessagkey.get(i)).setValue(null).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                      //  Toast.makeText(viewHolder.messageText.getContext(), "Long-tapped on: "+mMessagkey.get(i), Toast.LENGTH_SHORT).show();
+                    }
+                });
+               // String delete_key = getItem(i);
+                //notifyItemRangeChanged(i, mMessageList.size());
 
 
                 return false;
